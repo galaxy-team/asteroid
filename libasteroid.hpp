@@ -1,3 +1,6 @@
+#ifndef LIBASTEROID_HPP
+#define LIBASTEROID_HPP
+
 #include <cstdint>
 
 #include <string>
@@ -42,3 +45,5 @@ namespace galaxy{
         std::vector<std::uint16_t> object_code;
     };
 }
+
+#endif /* LIBASTEROID_HPP */
