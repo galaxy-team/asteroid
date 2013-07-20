@@ -31,7 +31,7 @@ namespace galaxy{
          * this is a map indexed by integers, each representing a location
          * in DASM-16 code.
          *
-         * The are positions mapped to the labels *used in those positions*.
+         * These are positions mapped to the labels *used in those positions*.
          * In the actual DASM-16 code, any positions where imported labels
          * are used will be set to their offeset and will be added to this map.
          * 
