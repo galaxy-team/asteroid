@@ -33,7 +33,7 @@ namespace galaxy{
          *
          * These are positions mapped to the labels *used in those positions*.
          * In the actual DASM-16 code, any positions where imported labels
-         * are used will be set to their offeset and will be added to this map.
+         * are used will be set to their offset and will be added to this map.
          * 
          * For example, SET PC, [foo_bar+1], where foo_bar is some imported label
          * will be changed to SET PC, [1] (with no short literal optimisation), and 
