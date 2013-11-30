@@ -117,10 +117,13 @@ std::string galaxy::asteroid_belt::read_char_string(T& in) {
     char* buffer = new char[1];
     std::string actual_out;
 
+    // char*'s are NULL terminated, so read chars 'till we find a NULL char
     while (in.peek() != 0) {
         in.read(buffer, 1);
         actual_out += buffer[0];
     }
+    // one byte of padding is added for god knows why
+    in.read(buffer, 1);
 
     return actual_out;
 }
