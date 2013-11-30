@@ -18,6 +18,24 @@ int main(int argc, char const *argv[])
         }
         std::cout << std::endl;
 
+        std::cout << "Imported Labels:" << std::endl;
+        for (std::pair<std::uint16_t, std::string> pair : objfile.imported_labels) {
+            std::cout << pair.first << ": " << pair.second << std::endl;
+        }
+        std::cout << std::endl;
+
+        std::cout << "Used_labels:" << std::endl;
+        for (auto val: objfile.used_labels) {
+            std::cout << val << std::endl;
+        }
+        std::cout << std::endl;
+
+        std::cout << "Object_code:" << std::endl;
+        for (auto val: objfile.object_code) {
+            std::cout << val << std::endl;
+        }
+        std::cout << std::endl;
+
         return 0;
 
     } else {
