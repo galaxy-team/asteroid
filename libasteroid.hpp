@@ -51,54 +51,47 @@ namespace galaxy {
     namespace asteroid_belt {
         template<typename T>
         std::uint16_t read_uint16_t(T& in);
-
         template<typename T>
         std::string read_char_string(T& in);
-
-        template<typename T>
-        int write_obj(galaxy::asteroid& object, T& outf);
-
         template<typename T>
         asteroid read_obj(T& in);
+
+        template<typename T>
+        void write_char_string(T& outf, std::string str);
+        template<typename T>
+        void write_uint16_t(T& outf, std::uint16_t i);
+        template<typename T>
+        void write_obj(galaxy::asteroid& object, T& outf);
     }
 }
 
 template<typename T>
-int galaxy::asteroid_belt::write_obj(galaxy::asteroid& object, T& outf) {
-    std::uint16_t size;
+void galaxy::asteroid_belt::write_obj(galaxy::asteroid& object, T& outf) {
     // write out object_file.exported_labels
-    size = object.exported_labels.size();
-    (&outf)->write(reinterpret_cast<char*>(&size), sizeof(std::uint16_t));
+    write_uint16_t(outf, object.exported_labels.size());
     for (std::pair<std::string, std::uint16_t> pair : object.exported_labels) {
-        const char *s = pair.first.c_str();
-        (&outf)->write(s, pair.first.size()+1);
-        (&outf)->write(reinterpret_cast<char*>(&pair.second), sizeof(std::uint16_t));
+        write_char_string(outf, pair.first);
+        write_uint16_t(outf, pair.second);
     }
 
     // write out object_file.imported_labels
-    size = object.imported_labels.size();
-    (&outf)->write(reinterpret_cast<char*>(&size), sizeof(std::uint16_t));
+    write_uint16_t(outf, object.imported_labels.size());
     for (std::pair<std::uint16_t, std::string> pair : object.imported_labels) {
-        const char *s = pair.second.c_str();
-        (&outf)->write(s, pair.second.size()+1);
-        (&outf)->write(reinterpret_cast<char*>(&pair.first), sizeof(std::uint16_t));
+        write_char_string(outf, pair.second);
+        write_uint16_t(outf, pair.first);
     }
 
     // write out object_file.used_labels
-    size = object.used_labels.size();
-    (&outf)->write(reinterpret_cast<char*>(&size), sizeof(std::uint16_t));
+    write_uint16_t(outf, object.used_labels.size());
     for (std::uint16_t address : object.used_labels) {
-        (&outf)->write(reinterpret_cast<char*>(&address), sizeof address);
+        write_uint16_t(outf, address);
     }
 
     // write out object_file.object_code
-    size = object.object_code.size();
-    (&outf)->write(reinterpret_cast<char*>(&size), sizeof(std::uint16_t));
+    write_uint16_t(outf, object.object_code.size());
     for (std::uint16_t byte : object.object_code) {
-        (&outf)->write(reinterpret_cast<char*>(&byte), sizeof byte);
+        write_uint16_t(outf, byte);
     }
-
-    return 0;
 }
 
 template<typename T>
@@ -113,6 +106,12 @@ std::uint16_t galaxy::asteroid_belt::read_uint16_t(T& in) {
 }
 
 template<typename T>
+void galaxy::asteroid_belt::write_uint16_t(T& outf, std::uint16_t i) {
+    (&outf)->write(reinterpret_cast<char*>(&i), sizeof(std::uint16_t));
+}
+
+
+template<typename T>
 std::string galaxy::asteroid_belt::read_char_string(T& in) {
     std::string out;
 
@@ -120,6 +119,13 @@ std::string galaxy::asteroid_belt::read_char_string(T& in) {
 
     return out;
 }
+
+template<typename T>
+void galaxy::asteroid_belt::write_char_string(T& outf, std::string str) {
+    const char *s = str.c_str();
+    (&outf)->write(s, str.size()+1);
+}
+
 
 template<typename T>
 galaxy::asteroid galaxy::asteroid_belt::read_obj(T& in) {
