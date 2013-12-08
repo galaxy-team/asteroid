@@ -32,7 +32,7 @@ int main(int argc, char const *argv[])
 
         std::cout << "Object_code:" << std::endl;
         for (auto val: objfile.object_code) {
-            std::cout << val << std::endl;
+            std::cout << "0x" << std::hex << val << std::endl;
         }
         std::cout << std::endl;
 
