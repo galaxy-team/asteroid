@@ -8,7 +8,6 @@
 #include <unordered_set>
 #include <vector>
 #include <sstream>
-#include <cstdint>
 
 #define LIBASTEROID_MAGIC_STRING "GALAXYOBJ"
 #define LIBASTEROID_VERSION_STRING "v0.1"
@@ -85,6 +84,7 @@ namespace galaxy {
 
 template<typename T>
 void galaxy::asteroid_belt::write_obj(galaxy::asteroid& object, T& outf) {
+    // write out the magic
     write_char_string(outf, LIBASTEROID_MAGIC_STRING);
     write_char_string(outf, LIBASTEROID_VERSION_STRING);
 
@@ -167,6 +167,7 @@ void galaxy::asteroid_belt::write_char_string(T& outf, std::string str) {
 
 template<typename T>
 galaxy::asteroid galaxy::asteroid_belt::read_obj(T& in) {
+    // check the file conforms to the "spec"
     galaxy::asteroid_belt::objectfile_format_check(in);
 
     galaxy::asteroid object;
