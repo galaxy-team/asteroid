@@ -70,13 +70,12 @@ namespace galaxy {
         template<typename T>
         void objectfile_format_check(T& in);
 
-        class InvalidObjectFile : std::exception {
+        class invalid_object_file : std::exception {
         private:
             std::string message;
         public:
-            InvalidObjectFile(std::string message) : message(message) {};
-            // InvalidObjectFile(char* message) : message(message) {};
-            virtual ~InvalidObjectFile() {};
+            invalid_object_file(std::string message) : message(message) {};
+            virtual ~invalid_object_file() {};
             virtual const char* what() const noexcept {
                 return message.c_str();
             }
@@ -120,7 +119,7 @@ template<typename T>
 void galaxy::asteroid_belt::objectfile_format_check(T& in) {
     std::string magic_string_check = read_char_string(in);
     if (magic_string_check != LIBASTEROID_MAGIC_STRING) {
-        throw galaxy::asteroid_belt::InvalidObjectFile(
+        throw galaxy::asteroid_belt::invalid_object_file(
             "This file does not seem to be a Jupiter object file"
         );
     }
