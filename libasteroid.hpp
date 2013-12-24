@@ -126,12 +126,9 @@ void galaxy::asteroid_belt::objectfile_format_check(T& in) {
 
     std::string version_check = read_char_string(in);
     if (version_check != LIBASTEROID_VERSION_STRING) {
-        std::string message = "This file was generated with version ";
-        message += LIBASTEROID_VERSION_STRING;
-        message += " of libasteroid/jupiter";
-        throw galaxy::asteroid_belt::InvalidObjectFile(
-            message
-        );
+        std::stringstream ss;
+        ss << "This file was generated with version " << version_check << " of libasteroid/jupiter";
+        throw galaxy::asteroid_belt::invalid_object_file(ss.str());
     }
 }
 
