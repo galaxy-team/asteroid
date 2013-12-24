@@ -7,6 +7,8 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+#include <sstream>
+#include <cstdint>
 
 #define LIBASTEROID_MAGIC_STRING "GALAXYOBJ"
 #define LIBASTEROID_VERSION_STRING "v0.1"
