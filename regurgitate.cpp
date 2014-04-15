@@ -14,13 +14,14 @@ int main(int argc, char const *argv[])
 
         std::cout << "Exported Labels:" << std::endl;
         for (std::pair<std::string, std::uint16_t> pair : objfile.exported_labels) {
-            std::cout << pair.first << ": " << pair.second << std::endl;
+            std::cout << pair.first << ": 0x" << std::hex << pair.second << std::endl;
         }
         std::cout << std::endl;
 
         std::cout << "Imported Labels:" << std::endl;
         for (std::pair<std::uint16_t, std::string> pair : objfile.imported_labels) {
-            std::cout << pair.first << ": " << pair.second << std::endl;
+            std::cout << "0x" << std::hex << pair.first;
+            std::cout << ": " << pair.second << std::endl;
         }
         std::cout << std::endl;
 
