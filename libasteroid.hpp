@@ -75,7 +75,7 @@ namespace galaxy {
         public:
             invalid_object_file(std::string message) : message(message) {};
             virtual ~invalid_object_file() {};
-            virtual const char* what() const noexcept {
+            virtual const char* what() const noexcept(true) {
                 return message.c_str();
             }
         };
