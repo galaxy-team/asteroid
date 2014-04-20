@@ -90,14 +90,14 @@ void galaxy::asteroid_belt::write_obj(galaxy::asteroid& object, T& outf) {
 
     // write out object_file.exported_labels
     write_uint16_t(outf, object.exported_labels.size());
-    for (std::pair<std::string, std::uint16_t> pair : object.exported_labels) {
+    for (auto pair : object.exported_labels) {
         write_char_string(outf, pair.first);
         write_uint16_t(outf, pair.second);
     }
 
     // write out object_file.imported_labels
     write_uint16_t(outf, object.imported_labels.size());
-    for (std::pair<std::uint16_t, std::string> pair : object.imported_labels) {
+    for (auto pair : object.imported_labels) {
         write_char_string(outf, pair.second);
         write_uint16_t(outf, pair.first);
     }
