@@ -9,8 +9,10 @@
 #include <vector>
 #include <sstream>
 
-#define LIBASTEROID_MAGIC_STRING "GALAXYOBJ"
-#define LIBASTEROID_VERSION_STRING "v0.1"
+#define ASTEROID_MAGIC_STRING "GALAXYOBJ"
+#define ASTEROID_VERSION_STRING "0001"
+#define ASTEROID_MIN_VERSION 1
+#define ASTEROID_MAX_VERSION 1
 
 namespace galaxy {
     struct asteroid {
@@ -67,14 +69,14 @@ namespace galaxy {
         void write_obj(galaxy::asteroid& object, T& outf);
 
         template<typename T>
-        void objectfile_format_check(T& in);
+        int objectfile_format_check(T& in);
 
         class invalid_object_file : std::exception {
         private:
             std::string message;
         public:
             invalid_object_file(std::string message) : message(message) {};
-            virtual ~invalid_object_file() noexcept(true) {};
+            virtual ~invalid_object_file() {};
             virtual const char* what() const noexcept {
                 return message.c_str();
             }
@@ -85,8 +87,8 @@ namespace galaxy {
 template<typename T>
 void galaxy::asteroid_belt::write_obj(galaxy::asteroid& object, T& outf) {
     // write out the magic
-    write_char_string(outf, LIBASTEROID_MAGIC_STRING);
-    write_char_string(outf, LIBASTEROID_VERSION_STRING);
+    write_char_string(outf, ASTEROID_MAGIC_STRING);
+    write_char_string(outf, ASTEROID_VERSION_STRING);
 
     // write out object_file.exported_labels
     write_uint16_t(outf, object.exported_labels.size());
@@ -116,20 +118,33 @@ void galaxy::asteroid_belt::write_obj(galaxy::asteroid& object, T& outf) {
 }
 
 template<typename T>
-void galaxy::asteroid_belt::objectfile_format_check(T& in) {
+int galaxy::asteroid_belt::objectfile_format_check(T& in) {
+    // check that it is actually an asteroid object file
     std::string magic_string_check = read_char_string(in);
     if (magic_string_check != LIBASTEROID_MAGIC_STRING) {
         throw galaxy::asteroid_belt::invalid_object_file(
-            "This file does not seem to be a Jupiter object file"
+            "This file is not a valid asteroid object file"
         );
     }
 
-    std::string version_check = read_char_string(in);
-    if (version_check != LIBASTEROID_VERSION_STRING) {
-        std::stringstream ss;
-        ss << "This file was generated with version " << version_check << " of libasteroid/jupiter";
-        throw galaxy::asteroid_belt::invalid_object_file(ss.str());
+    // check that it is a supported version
+    std::string version_str = read_char_string(in);
+    std::stringstream ss;
+    ss << version_str;
+    int version;
+    ss >> version;
+    if (version < ASTEROID_MIN_VERSION) {
+        throw galaxy::asteroid_belt::invalid_object_file(
+            "This version of asteroid does not support such an old version of the asteroid file format."
+        );
     }
+    if (version > ASTEROID_MAX_VERSION) {
+        throw galaxy::asteroid_belt::invalid_object_file(
+            "This version of asteroid does not support such a new version of the asteroid file format."
+        );
+    }
+
+    return version;
 }
 
 template<typename T>
@@ -168,7 +183,11 @@ void galaxy::asteroid_belt::write_char_string(T& outf, std::string str) {
 template<typename T>
 galaxy::asteroid galaxy::asteroid_belt::read_obj(T& in) {
     // check the file conforms to the "spec"
-    galaxy::asteroid_belt::objectfile_format_check(in);
+    int version = galaxy::asteroid_belt::objectfile_format_check(in);
+
+    // at this stage, since we only support one version,
+    // we don't need to dispatch the format interpretation
+    // based on format version.
 
     galaxy::asteroid object;
     std::uint16_t size;
