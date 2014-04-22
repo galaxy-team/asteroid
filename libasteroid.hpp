@@ -121,7 +121,7 @@ template<typename T>
 int galaxy::asteroid_belt::objectfile_format_check(T& in) {
     // check that it is actually an asteroid object file
     std::string magic_string_check = read_char_string(in);
-    if (magic_string_check != LIBASTEROID_MAGIC_STRING) {
+    if (magic_string_check != ASTEROID_MAGIC_STRING) {
         throw galaxy::asteroid_belt::invalid_object_file(
             "This file is not a valid asteroid object file"
         );
