@@ -3,6 +3,7 @@
 
 #include <cstdint>
 
+#include <limits>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -10,7 +11,7 @@
 #include <sstream>
 
 #define ASTEROID_MAGIC_STRING "GALAXYOBJ"
-#define ASTEROID_VERSION_STRING "0001"
+#define ASTEROID_VERSION_STRING "0002"
 #define ASTEROID_MIN_VERSION 1
 #define ASTEROID_MAX_VERSION 1
 
@@ -54,180 +55,22 @@ namespace galaxy {
     };
 
     namespace asteroid_belt {
-        template<typename T>
-        std::uint16_t read_uint16_t(T& in);
-        template<typename T>
-        std::string read_char_string(T& in);
-        template<typename T>
-        asteroid read_obj(T& in);
+        std::uint16_t read_uint16_t(std::istream&);
+        std::string read_char_string(std::istream&);
+        asteroid read_obj(std::istream&);
 
-        template<typename T>
-        void write_char_string(T& outf, std::string str);
-        template<typename T>
-        void write_uint16_t(T& outf, std::uint16_t i);
-        template<typename T>
-        void write_obj(galaxy::asteroid& object, T& outf);
+        void write_char_string(std::ostream&, std::string);
+        void write_uint16_t(std::ostream&, std::uint16_t);
+        void write_obj(std::ostream&, asteroid const&);
 
-        template<typename T>
-        int objectfile_format_check(T& in);
+        int objectfile_format_check(std::istream&);
 
-        class invalid_object_file : std::exception {
-        private:
-            std::string message;
-        public:
-            invalid_object_file(std::string message) : message(message) {};
-            virtual ~invalid_object_file() {};
-            virtual const char* what() const noexcept {
-                return message.c_str();
-            }
+        struct invalid_object_file : std::runtime_error {
+            invalid_object_file(const char *msg) : std::runtime_error{msg} {};
+            invalid_object_file(std::string msg) : std::runtime_error{msg.c_str()} {};
         };
     }
 }
 
-template<typename T>
-void galaxy::asteroid_belt::write_obj(galaxy::asteroid& object, T& outf) {
-    // write out the magic
-    write_char_string(outf, ASTEROID_MAGIC_STRING);
-    write_char_string(outf, ASTEROID_VERSION_STRING);
-
-    // write out object_file.exported_labels
-    write_uint16_t(outf, object.exported_labels.size());
-    for (auto pair : object.exported_labels) {
-        write_char_string(outf, pair.first);
-        write_uint16_t(outf, pair.second);
-    }
-
-    // write out object_file.imported_labels
-    write_uint16_t(outf, object.imported_labels.size());
-    for (auto pair : object.imported_labels) {
-        write_char_string(outf, pair.second);
-        write_uint16_t(outf, pair.first);
-    }
-
-    // write out object_file.used_labels
-    write_uint16_t(outf, object.used_labels.size());
-    for (std::uint16_t address : object.used_labels) {
-        write_uint16_t(outf, address);
-    }
-
-    // write out object_file.object_code
-    write_uint16_t(outf, object.object_code.size());
-    for (std::uint16_t byte : object.object_code) {
-        write_uint16_t(outf, byte);
-    }
-}
-
-template<typename T>
-int galaxy::asteroid_belt::objectfile_format_check(T& in) {
-    // check that it is actually an asteroid object file
-    std::string magic_string_check = read_char_string(in);
-    if (magic_string_check != ASTEROID_MAGIC_STRING) {
-        throw galaxy::asteroid_belt::invalid_object_file(
-            "This file is not a valid asteroid object file"
-        );
-    }
-
-    // check that it is a supported version
-    std::string version_str = read_char_string(in);
-    std::stringstream ss;
-    ss << version_str;
-    int version;
-    ss >> version;
-    if (version < ASTEROID_MIN_VERSION) {
-        throw galaxy::asteroid_belt::invalid_object_file(
-            "This version of asteroid does not support such an old version of the asteroid file format."
-        );
-    }
-    if (version > ASTEROID_MAX_VERSION) {
-        throw galaxy::asteroid_belt::invalid_object_file(
-            "This version of asteroid does not support such a new version of the asteroid file format."
-        );
-    }
-
-    return version;
-}
-
-template<typename T>
-std::uint16_t galaxy::asteroid_belt::read_uint16_t(T& in) {
-    const std::streamsize uint16_t_size = sizeof(std::uint16_t);
-    char* buffer = new char[uint16_t_size];
-
-    in.read(buffer, uint16_t_size);
-    std::uint16_t* size = reinterpret_cast<std::uint16_t*>(buffer);
-
-    return *size;
-}
-
-template<typename T>
-void galaxy::asteroid_belt::write_uint16_t(T& outf, std::uint16_t i) {
-    (&outf)->write(reinterpret_cast<char*>(&i), sizeof(std::uint16_t));
-}
-
-
-template<typename T>
-std::string galaxy::asteroid_belt::read_char_string(T& in) {
-    std::string out;
-
-    std::getline(in, out, '\0');
-
-    return out;
-}
-
-template<typename T>
-void galaxy::asteroid_belt::write_char_string(T& outf, std::string str) {
-    const char *s = str.c_str();
-    (&outf)->write(s, str.size()+1);
-}
-
-
-template<typename T>
-galaxy::asteroid galaxy::asteroid_belt::read_obj(T& in) {
-    // check the file conforms to the "spec"
-    int version = galaxy::asteroid_belt::objectfile_format_check(in);
-
-    // at this stage, since we only support one version,
-    // we don't need to dispatch the format interpretation
-    // based on format version.
-
-    galaxy::asteroid object;
-    std::uint16_t size;
-
-    // read in the exported_labels
-    size = read_uint16_t(in);
-    for (int i = 0; i < size; i++) {
-        std::pair<std::string, std::uint16_t> pair;
-        pair.first = read_char_string(in);
-        pair.second = read_uint16_t(in);
-        object.exported_labels.insert(pair);
-    }
-
-    // read in the imported_labels
-    size = read_uint16_t(in);
-    for (int i = 0; i < size; i++) {
-        std::pair<std::uint16_t, std::string> pair;
-        pair.first = read_uint16_t(in);
-        pair.second = read_char_string(in);
-        object.imported_labels.insert(pair);
-    }
-
-    // read in the used_labels
-    size = read_uint16_t(in);
-    for (int i = 0; i < size; i++) {
-        object.used_labels.insert(
-            read_uint16_t(in)
-        );
-    }
-
-    // read in the object_code
-    size = read_uint16_t(in);
-    for (int i = 0; i < size; i++) {
-        object.object_code.push_back(
-            read_uint16_t(in)
-        );
-    }
-
-    return object;
-}
-
-
 #endif /* LIBASTEROID_HPP */
+
